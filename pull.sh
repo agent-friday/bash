@@ -47,6 +47,19 @@ function pullAllRepos() {
   done
 }
 
+function help() {
+#      "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
+  echo "Usage: pull <repository>"
+  echo ""
+  echo "Pull an individual git repository or multiple repositories all at once."
+  echo "All repositories are assumed to be located at '$PROJ_HOME/<repository>'"
+  echo ""
+  echo "Pulling multiple repositories at once can be achieved by calling `pull all`."
+  echo "This will loop through a list of repositories stored in '$REPOS'; one per line."
+  echo "Repositories can be skipped by prefixing them with a '#'"
+  echo ""
+}
+
 #################################
 # MAIN
 #################################
@@ -58,6 +71,9 @@ if [[ -n $REPO ]]; then
     pullAllRepos
   elif [[ -d "$PROJ_HOME/$REPO" ]]; then
     pullRepo "$REPO"
+  elif [[ $REPO =~ ^-?h(elp)? ]]; then
+    help
+    exit
   else
     echo "Chould not fine directory: $PROJ_HOME/$REPO"
   fi
