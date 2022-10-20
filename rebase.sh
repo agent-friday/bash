@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MAIN_BRANCH=master
+MAIN_BRANCH=main
 REV_COUNT=$(git rev-list $MAIN_BRANCH.. --count)
   
 function help() {
