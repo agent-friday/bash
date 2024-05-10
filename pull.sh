@@ -30,13 +30,17 @@ function checkReposFile() {
 
 # Pulls an individual repo
 function pullRepo() {
-  echo "Updating \033[0;;31m$1\033[0m"
-  cd "$PROJ_HOME/$1"
-  printf "\033[1m;34m"
-  git pull --rebase --autostash
-  printf "\033[0m\033[1;37m"
-  git gc
-  echo "\033[0m"
+  if [[ -d "$PROJ_HOME/$1" ]]; then
+    echo "Updating \033[0;;31m$1\033[0m"
+    cd "$PROJ_HOME/$1"
+    printf "\033[1m;34m"
+    git pull --rebase --autostash
+    printf "\033[0m\033[1;37m"
+    git gc
+    echo "\033[0m"
+  else
+    echo "Chould not find directory $PROJ_HOME/$1"
+  fi
 }
 
 # Pulls all repos listed in the $REPOS file
@@ -64,17 +68,33 @@ function help() {
 # MAIN
 #################################
 REPO=$1
+
+if [[ $REPO =~ ^-?h(elp)? ]]; then
+    help
+    exit 0
+fi
+
 checkProjHome
 if [[ -n $REPO ]]; then
   if [[ $REPO == $ALL ]]; then
     checkReposFile
     pullAllRepos
+  elif [[ $REPO == "." && $(pwd) =~ ^$PROJ_HOME ]]; then
+    REPO=${PWD##*/}
+    pullRepo "$REPO"
+  elif [[ $REPO =~ [,:] ]]; then
+    IFS=',:' read -ra REPO_LIST <<< $REPO
+    for r in "${REPO_LIST[@]}"; do
+        pullRepo "$r"
+    done
   elif [[ -d "$PROJ_HOME/$REPO" ]]; then
     pullRepo "$REPO"
-  elif [[ $REPO =~ ^-?h(elp)? ]]; then
-    help
+  elif [[ $REPO =~ ^--?l(ist)? ]]; then
+    cat "$REPOS"
     exit
   else
-    echo "Chould not fine directory: $PROJ_HOME/$REPO"
+    pullRepo "$REPO"
   fi
+else
+  help
 fi
